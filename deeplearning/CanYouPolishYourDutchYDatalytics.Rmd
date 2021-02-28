@@ -1,0 +1,698 @@
+---
+title: "Can You Polish Your Dutch?"
+author: "Jacek Pardyak"
+date: "November 8th, 2017"
+output:
+  beamer_presentation: default
+  slidy_presentation: default
+header-includes: \usepackage{animate}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Outline
+
+- Business understanding
+
+- Data understanding
+
+- Data preparation
+
+- Model construction
+
+- Model evaluation
+
+- Insights from the data
+
+## Business understanding
+
+To communicate people use words. Words are composed of letters over an alphabet.
+
+```{r, echo=FALSE}
+alphabetPL <- c('a', 'ą', 'b', 'c', 'ć', 'd', 'e', 'ę', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'ł', 'm', 'n', 'ń', 'o', 'ó', 'p', 'r', 's', 'ś', 't', 'u', 'w', 'y', 'z', 'ź', 'ż')
+alphabetNL <- c('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z')
+
+```
+
+Letters common for the two languages: `r intersect(alphabetPL, alphabetNL)`.
+
+Letters exclusively used in Polish: `r setdiff(alphabetPL, alphabetNL)`
+
+Letters exclusively used in Dutch: `r setdiff(alphabetNL, alphabetPL)`
+
+
+## Problem understanding
+
+Build a model which distinguishes Polish words from Dutch.
+
+```{r, out.width = "300px"}
+knitr::include_graphics("flagues.jpg")
+```
+
+
+Eventually find (dis)similarities of the two languages.
+
+## Data understanding
+
+To train and test models we use **Aspell** dictionaries. 
+
+```{r, echo=FALSE}
+wordsPL <- read.csv(file="./dics/pl.wl",
+               header = F,
+               encoding = 'UTF-8',
+               stringsAsFactors = F)
+
+
+wordsNL <- read.csv(file="./dics/nl.wl",
+               header = F,
+               encoding = 'UTF-8',
+               stringsAsFactors = F)
+
+names(wordsPL) <- c("Word")
+names(wordsNL) <- c("Word")
+```
+
+Sample of the Polish data:
+
+```{r, echo=FALSE, warning=FALSE}
+knitr::kable(
+wordsPL$Word[sample(1:nrow(wordsPL),6,replace=F)], caption = 'Head of Polish dictionary'
+)
+```
+
+Polish is inflected language. Symbols after **/** are used to mark affixes. 
+
+## Data understanding cont.
+
+Sample of the Dutch data:
+
+```{r, echo=FALSE, warning=FALSE}
+knitr::kable(
+wordsNL$Word[sample(1:nrow(wordsNL),6,replace=F)], caption = 'Head of Polish dictionary'
+)
+```
+
+We use `r nrow(wordsNL)` Dutch and `r nrow(wordsPL)` Polish words. After applying 7k inflection rules number of words in Polish grows to 3.8M.
+
+
+## Data preparation
+
+```{r, echo=FALSE, message=FALSE}
+library("RWeka") # for tokanizer
+library("tm") # for document-term-matrix
+
+wordsPL$Lang <- c('PL')
+wordsNL$Lang <- c('NL')
+words <- rbind(wordsPL, wordsNL)
+
+UnicodeTokenizer <- function(x){
+  NGramTokenizer(x, Weka_control(min = 2, max = 2))} # two bytes in UTF-8 for a char
+ 
+```
+
+1. Remove everything after "/" sign
+
+```{r, echo=TRUE}
+words$Word <- gsub("\\/.*","",words$Word)
+
+```
+
+
+2. Split words into list of letters
+
+```{r, echo=TRUE}
+words$Word_split <- lapply(words$Word, function(x) {
+  paste(unlist(strsplit(x, "")), collapse = " ")})
+```
+
+3. Coerce list of words into "document-term-matrix"
+
+```{r, echo=TRUE}
+dtm <- DocumentTermMatrix(Corpus(VectorSource(
+  words$Word_split)), control = list(
+    tokenize = UnicodeTokenizer, wordLengths = c(1,2)))
+```
+
+## Data preparation cont.
+
+For example words:
+
+```{r, echo=FALSE}
+ind <- c(311, 31197)
+```
+```{r}
+words$Word[ind]
+```
+
+are represented as:
+
+```{r}
+inspect(dtm[ind,])
+```
+
+
+## Data preparation cont.
+
+4. Create output variable of two classes (1 for Dutch word, 0 otherwise)
+
+```{r, echo=FALSE}
+class <- as.integer(words$Lang == "NL")
+```
+
+5. Split the data into training and test data sets (70/30)
+
+```{r, echo=FALSE}
+df <- data.frame(as.matrix(dtm))
+names(df) <- paste("V", seq(40), sep = "_")
+spec = c(train = .7, test = .3) # train = .6, test = .2, validate = .2
+
+g = sample(cut(
+  seq(nrow(df)), 
+  nrow(df)*cumsum(c(0,spec)),
+  labels = names(spec)
+))
+
+res.df = split(df, g)
+X_train <- res.df$train
+X_test  <- res.df$test
+
+X_train <- as.matrix(X_train)
+X_test  <- as.matrix(X_test)
+
+
+res.class <- split(class, g)
+Y_train <- res.class$train
+Y_test  <- res.class$test
+```
+
+Finally: 
+
+- `X_train` - matrix of `r dim(X_train)[1]` rows and `r dim(X_train)[2]` columns stores input variables of training data set
+
+- `Y_train` - vector of `r length(Y_train)` elements stores output variable of training data set
+
+- `X_test` - matrix of `r dim(X_test)[1]` rows and `r dim(X_test)[2]` columns stores input variables of test data set
+
+- `Y_test` - vector of `r length(Y_test)` elements stores output variable of test data set
+
+## Model construction
+
+```{r}
+# naiveBayes
+model <- e1071::naiveBayes(x = X_train, y = as.factor(Y_train))
+```
+
+## Model evaluation
+```{r, echo=TRUE}
+# Make predictions on the test dataset
+Y_test_hat <-  predict(model, X_test)
+
+```
+
+```{r, echo=FALSE}
+
+# confusion matrix
+table(Y_test, Y_test_hat)
+# accuracy, precision, recall
+evaluate_model <- function(predict, actual){
+  accuracy <- mean(predict == actual)
+  precision <- sum(predict & actual) / sum(predict)
+  recall <- sum(predict & actual) / sum(actual)
+  fmeasure <- 2 * precision * recall / (precision + recall)
+
+  cat('accuracy:  ')
+  cat(accuracy * 100)
+  cat('%')
+  cat('\n')
+    
+  cat('precision:  ')
+  cat(precision * 100)
+  cat('%')
+  cat('\n')
+  
+  cat('recall:     ')
+  cat(recall * 100)
+  cat('%')
+  cat('\n')
+  
+  cat('f-measure:  ')
+  cat(fmeasure * 100)
+  cat('%')
+  cat('\n')
+}
+
+```
+
+```{r}
+evaluate_model(Y_test, as.integer(as.character(Y_test_hat)))
+```
+
+## Model construction
+
+To construct our first Deep Neural Network model we need to perform following steps:
+
+- initialize the model,
+
+- add layers to the model,
+
+- compile and fit our model.
+
+```{r, echo=TRUE, message=FALSE}
+# Load 'keras' - API to 'TensorFlow' engine
+require(keras)
+# Apply one-hot-bit encoding 
+Y_train <- to_categorical(Y_train)
+# Construct an empty sequential model
+# composed of a linear stack of layers
+model <- keras_model_sequential() 
+```
+
+## Model construction cont.
+
+```{r, echo=TRUE}
+model %>%
+  # add a dense layer
+  layer_dense(units = 500, input_shape = 40,
+              kernel_initializer="glorot_uniform",
+              activation="sigmoid") %>%
+  # add dropout to prevent overfitting
+  layer_dropout(rate = 0.5) %>%
+  layer_dense(units = 300,
+              kernel_initializer="glorot_uniform",
+              activation="sigmoid")  %>%
+  layer_dropout(rate = 0.5) %>% 
+  layer_dense(units = 100,
+              kernel_initializer="glorot_uniform",
+              activation="sigmoid")  %>%
+  layer_dropout(rate = 0.5) %>% 
+  layer_dense(units = 2,
+              kernel_initializer="glorot_uniform",
+              activation="softmax")
+```
+
+## Model construction cont.
+
+```{r, echo=TRUE}
+# Compile the model
+model %>% 
+  compile(loss = 'categorical_crossentropy',
+          optimizer = optimizer_adam(lr=0.001,
+                                     beta_1=0.9,
+                                     beta_2=0.999, 
+                                     epsilon=1e-08,
+                                     decay=0.0),
+          metrics = 'accuracy') 
+```
+
+```{r, echo=TRUE, eval=FALSE}
+# Fit the model from the training data
+training_history <- model %>%
+  # batch_size - number of samples per gradient update  
+  # epochs - number of times to iterate on a dataset  
+  fit(X_train, Y_train, batch_size = 64,
+      epochs = 12, verbose = 1,
+      validation_split = 0.1)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+# Save model and training history
+save(training_history, file = "./training_history")
+save_model_weights_hdf5(model,  filepath = "./model_hdf5")
+```
+
+
+## Model construction cont.
+
+Training history:
+
+```{r, echo=FALSE}
+load("./training_history")
+plot(training_history)
+load_model_weights_hdf5(model, filepath = "./model_hdf5")
+```
+
+
+## Model evaluation
+
+
+
+
+```{r}
+evaluate_model(Y_test_hat, Y_test)
+```
+
+## Results
+
+We applied Neural Networks to identify language of a word just using letter frequencies. 
+
+Performance of the model is very good - accuracy, precision and recall above 90%. 
+
+Further we try to understand this behavior.
+
+## Insigths from data
+
+Word length comparison:
+
+```{r, echo=FALSE, message=FALSE}
+words$Length <- sapply(words$Word, nchar)
+require(ggplot2)
+ggplot(words, aes(x=Length, fill=Lang)) +
+    geom_histogram(binwidth=1, alpha=.5, position="identity")
+```
+
+## Insigths from data cont.
+
+Relative letter frequency:
+
+```{r, echo=FALSE, message=FALSE}
+require(plyr)
+docs <- words[words$Lang == "PL",'Word']
+docs <- tolower(docs)
+docs <- gsub("", " ", docs)
+docs <- strsplit(docs, " ")
+docs <- unlist(docs)
+docs <- table(docs)
+docs <- data.frame(docs)
+docs <- docs[docs$docs != "",]
+docs$Freq[is.na(docs$Freq)] <- 0
+docs$Freq <- docs$Freq / sum(docs$Freq)
+docsPL <- docs[order(docs$Freq, decreasing = TRUE),]
+names(docsPL) <- c("Letter", "PL")
+
+docs <- words[words$Lang == "NL",'Word']
+docs <- tolower(docs)
+docs <- gsub("", " ", docs)
+docs <- strsplit(docs, " ")
+docs <- unlist(docs)
+docs <- table(docs)
+docs <- data.frame(docs)
+docs <- docs[docs$docs != "",]
+docs$Freq[is.na(docs$Freq)] <- 0
+docs$Freq <- docs$Freq / sum(docs$Freq)
+docsNL <- docs[order(docs$Freq, decreasing = TRUE),]
+names(docsNL) <- c("Letter", "NL")
+
+res <- join(docsNL[1:10,], docsPL[1:10,], type = "full")
+res <- data.frame(res[,1])
+names(res) <-c("Letter")
+res <- join(res, docsNL)
+res <- join(res, docsPL)
+```
+
+
+```{r, echo=FALSE, message=FALSE}
+
+ggplot(res, aes(x= PL, y= NL, label=Letter)) +
+  geom_point() +
+  geom_text(aes(label=Letter),hjust=0, vjust=0, size=10)
+```
+
+## Insigths from data cont.
+
+Relative frequency of initial trigrams:
+
+```{r, echo=F, message=FALSE}
+words$Trigram <- tolower(substr(words$Word,1,3))
+
+docs <- words[words$Lang == "PL",'Trigram']
+docs <- table(docs)
+docs <- data.frame(docs)
+docs$Freq <- docs$Freq / sum(docs$Freq)
+docsPL <- docs[order(docs$Freq, decreasing = TRUE),]
+names(docsPL) <- c("Trigram", "PL")
+
+docs <- words[words$Lang == "NL",'Trigram']
+docs <- table(docs)
+docs <- data.frame(docs)
+docs$Freq <- docs$Freq / sum(docs$Freq)
+docsNL <- docs[order(docs$Freq, decreasing = TRUE),]
+names(docsNL) <- c("Trigram", "NL")
+
+res <- join(docsNL[1:3,], docsPL[1:3,], type = "full")
+
+res <- data.frame(res[,1])
+names(res) <-c("Trigram")
+res <- join(res, docsNL)
+res <- join(res, docsPL)
+res[is.na(res$PL),"PL"] <- 0
+```
+
+
+```{r, echo=FALSE}
+ggplot(res, aes(x= PL, y= NL, label=Trigram)) +
+  geom_point() +
+  geom_text(aes(label=Trigram),hjust=0, vjust=0, size=10)
+```
+
+## Insigths from data cont.
+
+Polish words perfectly and approximately matching Dutch words:
+
+- ananas, balkon, chaos, duet, echo, filet, gratis,
+handel, impotent, jacht, kapsel, legenda, wiek and 3.3k more
+
+- abiturient ~ abituriënt, banan ~ banaan, 
+bestseler ~ bestseller, dermatolog ~ dermatoloog, 
+fortepian ~ fortepiano, wachta ~ wacht and 2.6k more
+
+Our DNN model was trained on words assigned to two different classes.
+
+Watch 'false friends' - words spelled the same but meaning something different.
+
+
+## Insigths from data cont.
+
+```{r, echo=FALSE, eval=FALSE}
+library(markovchain) 
+# read files
+wordsPL <- read.csv(file="./dics/pl.wl",
+                    header = F,
+                    encoding = 'UTF-8',
+                    stringsAsFactors = F)
+
+
+wordsNL <- read.csv(file="./dics/nl.wl",
+                    header = F,
+                    encoding = 'UTF-8',
+                    stringsAsFactors = F)
+
+names(wordsPL) <- c("Word")
+names(wordsNL) <- c("Word")
+
+# clean a little
+wordsPL$Word <- gsub("\\/.*","",wordsPL$Word)
+wordsNL$Word <- gsub("\\/.*","",wordsNL$Word)
+
+# bind together
+wordsPL$Lang <- c('PL')
+wordsNL$Lang <- c('NL')
+words <- rbind(wordsPL, wordsNL)
+
+# remove starting with capital 
+words$Capital <- toupper(substr(words$Word,1,1)) == substr(words$Word,1,1)
+words <- words[words$Capital == FALSE,]
+
+# Add word start and end signs
+words$WordSigns <- sapply(words$Word, function(x) {
+  paste(paste("_",x,sep=""),".",sep="")})
+
+# Filter Polish and Dutch
+wordsPL <- words[words$Lang == 'PL', 'WordSigns']
+wordsNL <- words[words$Lang == 'NL', 'WordSigns']
+# Make copy for exclusion
+oldWordsPL <- words[words$Lang == 'PL', 'Word']
+oldWordsNL <- words[words$Lang == 'NL', 'Word']
+
+# paste into one vector
+wordsPL <- paste(wordsPL, collapse = '')
+wordsNL <- paste(wordsNL, collapse = '')
+
+# split the vector on seperate signs
+wordsPL <- strsplit(wordsPL, "")[[1]]
+wordsNL <- strsplit(wordsNL, "")[[1]]
+
+# Build models
+mcFitPL <- markovchainFit(data = wordsPL)
+mcFitNL <- markovchainFit(data = wordsNL)
+
+# Build new sequences - PL
+newWordsPL <- markovchainSequence(n=10000, markovchain=mcFitPL$estimate, 
+                           include=TRUE, t0="_")
+
+newWordsPL <- paste(newWordsPL, collapse = "")
+newWordsPL <- unlist(strsplit(newWordsPL, "[.]"))
+newWordsPL <- sapply(newWordsPL,function(x) {gsub("_","",x)})
+newWordsPL <- unique(newWordsPL)
+newWordsPL <- data.frame(newWordsPL)
+newWordsPL <- newWordsPL[sapply(newWordsPL[,1], function(x){
+  y <- as.character(x)
+  if(nchar(y) > 3 & nchar(y) < 8) {TRUE} else {FALSE}
+  }),]
+
+newWordsPL <- as.character(newWordsPL)
+newWordsPL <- data.frame(setdiff(newWordsPL, oldWordsPL))
+
+# Build new sequences - NL
+newWordsNL <- markovchainSequence(n=10000, markovchain=mcFitNL$estimate, 
+                           include=TRUE, t0="_")
+
+newWordsNL <- paste(newWordsNL, collapse = "")
+newWordsNL <- unlist(strsplit(newWordsNL, "[.]"))
+newWordsNL <- sapply(newWordsNL,function(x) {gsub("_","",x)})
+newWordsNL <- unique(newWordsNL)
+newWordsNL <- data.frame(newWordsNL)
+newWordsNL <- newWordsNL[sapply(newWordsNL[,1], function(x){
+  y <- as.character(x)
+  if(nchar(y) > 3 & nchar(y) < 8) {TRUE} else {FALSE}
+  }),]
+
+newWordsNL <- as.character(newWordsNL)
+newWordsNL <- data.frame(setdiff(newWordsNL, oldWordsNL))
+
+
+write.table(newWordsPL,file="./dics/newWordsPL",quote = FALSE,
+            col.names = FALSE, row.names = FALSE)
+write.table(newWordsNL,file="./dics/newWordsNL",quote = FALSE,
+            col.names = FALSE, row.names = FALSE)
+
+save(mcFitNL,mcFitPL, file = './dics/models.RData')
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+library(markovchain) 
+load(file = './dics/models.RData')
+
+# Part of the Polish model
+states <- c("_", "e", "i", "n", ".")
+matrix <- mcFitPL$estimate@transitionMatrix
+matrix <- matrix[states,states]
+limit <- nrow(matrix)
+vec <- c()
+for(i in 1:limit){
+vec[i] <- 1/sum(matrix[i,])}
+
+for(i in 1:limit){
+matrix[i,] <- matrix[i,]*vec[i]}
+
+mcPL <- new("markovchain",
+            states = states,
+            transitionMatrix = matrix,
+            name = "Polish")
+
+# Part of the Dutch model
+states <- c("_", "a", "e", "s", "t", "n", ".")
+matrix <- mcFitNL$estimate@transitionMatrix
+matrix <- matrix[states,states]
+limit <- nrow(matrix)
+vec <- c()
+for(i in 1:limit){
+vec[i] <- 1/sum(matrix[i,])}
+
+for(i in 1:limit){
+matrix[i,] <- matrix[i,]*vec[i]}
+
+mcNL <- new("markovchain",
+            states = states,
+            transitionMatrix = matrix,
+            name = "Dutch")
+
+```
+
+We can use Markov chains to build probabilistic model of a language.
+Excerpt of the Polish model:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# Stan _ oznacza początek słowa."
+par(mar=c(0, 0, 0, 0))
+plot(mcPL, color = 1)
+#png('mcPL.png')
+#plot(mcPL)
+#dev.off()
+```
+
+## Insigths from data cont.
+
+Excerpt of the Dutch language probabilistic model:
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+par(mar=c(0, 0, 0, 0))
+plot(mcNL, color = 1)
+#png('mcNL.png', width = 600, height = 600)
+#plot(mcNL)
+#dev.off()
+```
+
+## Insigths from data cont.
+
+Animated most likely "random" walk through the Dutch graph:
+
+```{r , echo=FALSE, fig.show='animate', message=FALSE, warning=FALSE, out.width='4in'}
+library(animation)
+require(png)
+require(rasterImage)
+img <- readPNG("./mcNL.png")
+
+img <- as.raster(img[,,1:3])
+plot(img)
+
+oopt = ani.options(interval = 1, nmax = 50)
+
+x <-      c(  515  , 425, 245, 115, 150,  360)
+y <-      c(  355  , 135, 105, 265, 510,  465)
+labels <- c("START", "S", "T", "E", "N", "STOP")
+
+for (i in 1:ani.options("nmax")) {
+  plot(img)
+     text(x = x[i] , y = y[i], col = "red", cex = 4, 
+             labels = labels[i], pos = 3);
+    lines(x = c(x[i], x[i+1]) ,
+        y = c(y[i], y[i+1]), col = "red", cex = 2, pch = 19);
+    text(x = x[i+1] , y = y[i+1], col = "red", cex = 4, 
+         labels = labels[i+1], pos = 3)
+     ani.pause()
+  }
+ani.options(oopt)
+
+```
+
+## Insigths from data cont.
+
+```{r, echo=FALSE}
+predictPL <- paste(predict(mcFitPL$estimate, newdata="_",n.ahead=3),
+                   collapse = "")
+                     
+predictNL <- paste(predict(mcFitNL$estimate, newdata="_",n.ahead=4),
+                   collapse = "")
+```
+
+```{r, echo=FALSE}
+newWordsPL <- read.table(file = "./dics/newWordsPL",
+                         encoding = 'UTF-8')
+names(newWordsPL) <- c("Word")
+newWordsNL <- read.table(file = "./dics/newWordsNL",
+                         encoding = 'UTF-8')
+names(newWordsNL) <- c("Word")
+```
+
+
+Probabilistic language models can be used to generate 'synthetic` words: 
+
+- `r newWordsPL[c(9,10,18,29,55,68,99,126),]`
+
+- `r newWordsNL[c(6,16,19,20,21,24,78,169),]`
+
+Our model accurately recognized language of these synthetic words.
+
+## Summary
+
+- Deep Learning is a very powerful technique
+
+- Use of bi- and trigrams will lead to even better performance
+
+- Dutch and Polish are dissimilar languages
+
+- About 3% of words is commonly used in Polish and Dutch
+
