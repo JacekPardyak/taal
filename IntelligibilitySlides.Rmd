@@ -1,0 +1,62 @@
+---
+title: "IntelligibilitySlides"
+author: "Jacek Pardyak"
+date: "11 september 2018"
+output: beamer_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## 
+
+```{r echo = FALSE}
+    # vocabulary distance using exact match as word comparison
+    m <- read.csv('./Europe/diff.csv')
+    names <- union(unique(m$lang_0), unique(m$lang_1))
+    mDist = matrix(data  = rep(0, length(names)^2),
+                   byrow = T,
+                   nrow  = length(names),
+                   ncol  = length(names),
+                   dimnames = list(names, names)
+    )
+    
+    for (x in names) {
+      for (y in names) {
+        val = m[m$lang_0 == x & m$lang_1 == y, 'coeff']
+        if(length(val) == 0){val = 0}
+        mDist[y,x] <- val
+      }}
+    
+#mDist2 = mDist
+mDist = as.dist(mDist)
+methods = c("complete", "average", "mcquitty") 
+# not performing:  "single", "ward.D2", "ward.D", "median", "centroid"
+
+plot(hclust(d = mDist,
+                method = methods[1]),
+         main = "",
+         sub =  paste('with "', methods[1], '" method', sep = '' ),
+         xlab = 'Hierarchical Clustering of the EU Languages')
+```
+
+##
+
+```{r}
+plot(hclust(d = mDist,
+                method = methods[2]),
+         main = "",
+         sub =  paste('with "', methods[2], '" method', sep = '' ),
+         xlab = 'Hierarchical Clustering of the EU Languages')
+```
+
+##
+
+```{r}
+plot(hclust(d = mDist,
+                method = methods[3]),
+         main = "",
+         sub =  paste('with "', methods[3], '" method', sep = '' ),
+         xlab = 'Hierarchical Clustering of the EU Languages')
+```
