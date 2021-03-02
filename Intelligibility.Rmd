@@ -453,52 +453,73 @@ The EU has 24 official languages used by people within 28 member states. Vocabul
 
 
 
-
-
-
-
-
-
-
-
-
-    
-```{r, echo=FALSE, eval=FALSE}
-library(leaflet)
-nycounties <- rgdal::readOGR("./ref-countries-2020-60m.geojson/CNTR_BN_60M_2020_3035_INLAND.geojson")
-pal <- colorNumeric("viridis", NULL)
-
-leaflet(nycounties) %>%
-  addTiles() %>%
-  addPolygons(stroke = FALSE, smoothFactor = 0.3, fillOpacity = 1,
-    fillColor = ~pal(FID),
-    label = ~paste0(FID, ": ", formatC(FID, big.mark = ","))) %>%
-  addLegend(pal = pal, values = ~FID, opacity = 1.0,
-    labFormat = labelFormat(transform = function(x) round(10^x)))
-
-```
-    
-```{r, eval=FALSE}
-library(rgdal)
-library(raster)
-library(rgeos)
-#sjer_aoi_WGS84 <- spTransform(sjer_aoi,
-#                                crs(nycounties))
-
-# what is the CRS of the new object
-crs(nycounties)
-## CRS arguments:
-##  +proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0
-# does the extent look like decimal degrees?
-extent(sjer_aoi_WGS84)
+```{python}
+lst = languages.language.values.tolist()
+#lst = lst.sort()
+lst
+#print(list)
+#list.sort()
 ```
 
-```{r, eval=FALSE}
-mat <- as.matrix(mDist)
-#mat[lower.tri(mat)] <- ''
-knitr::kable(mat[,2:8], caption = "Vocabularies distance using exact word matching")
-knitr::kable(mat[,9:15], caption = "Vocabularies distance using exact word matching cntd")
-knitr::kable(mat[,16:22], caption = "Vocabularies distance using exact word matching cntd")
 
-```
 
+## List of words in 30 European Languages
+
+
+### Context
+
+Most of the NLP material in Kaggle deals with the analysis of the English language. With these collections of words from other spoken languages, you can solve the same problems and encounter a new language-specific one.  
+
+
+### Content
+
+This collection contains word lists in the following languages:
+
+'Albanian', 'Belarusian', 'Bosnian', 'Bulgarian', 'Croatian', 'Czech', 'Danish', 'Dutch', 'English', 'Estonian', 'French', 'German', 'Greek', 'Hungarian', 'Icelandic', 'Italian', 'Latvian', 'Lithuanian', 'Norwegian (nb_NO and nn_NO)', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Serbian', 'Slovak', 'Slovenian', 'Spanish', 'Swedish', 'Turkish', 'Ukrainian'
+
+The separate file languages` indicates the encoding of each file. I had no problems reading files in Python. In R, if `base::read.csv` fails for some encoding, the `readr::read_csv` works.
+
+readr::read_csv
+
+### Acknowledgements
+
+These collections are based on https://github.com/LibreOffice/dictionaries 
+
+
+### Inspiration
+
+Any form of contact with the language we learn brings us closer to our goal. Working with a language that we know helps us understand it better. Have fun!
+
+
+
+Bulgarian  bg_BG  bg_BG        bg_BG        utf_8
+1     Croatian  hr_HR  hr_HR        hr_HR   iso-8859-2
+2        Czech  cs_CZ  cs_CZ        cs_CZ   iso-8859-2
+3       Danish  da_DK  da_DK        da_DK   iso-8859-1
+4        Dutch  nl_NL  nl_NL        nl_NL   iso-8859-1
+5      English  en_GB     en        en_GB   iso-8859-1
+6     Estonian  et_EE  et_EE        et_EE  iso-8859-15
+8       French  fr_FR  fr_FR           fr  iso-8859-15
+9       German  de_DE     de  de_DE_frami   iso-8859-1
+10       Greek  el_GR  el_GR        el_GR   iso-8859-7
+11   Hungarian  hu_HU  hu_HU        hu_HU        utf_8
+13     Italian  it_IT  it_IT        it_IT  iso-8859-15
+14     Latvian  lv_LV  lv_LV        lv_LV  iso-8859-13
+15  Lithuanian  lt_LT  lt_LT           lt  iso-8859-13
+17      Polish  pl_PL  pl_PL        pl_PL   iso-8859-2
+18  Portuguese  pt_PT  pt_PT        pt_PT   iso-8859-1
+19    Romanian  ro_RO     ro        ro_RO   iso-8859-2
+20      Slovak  sk_SK  sk_SK        sk_SK   iso-8859-2
+21   Slovenian  sl_SI  sl_SI        sl_SI   iso-8859-2
+22     Spanish  es_ES     es        es_ES   iso-8859-1
+23     Swedish  sv_SE  sv_SE        sv_SE   iso-8859-1
+24     Russian  ru_RU  ru_RU        ru_RU        utf_8
+25   Ukrainian  uk_UA  uk_UA        uk_UA        utf_8
+26     Turkish  tr_TR  tr_TR        tr_TR        utf_8
+27     Serbian  sr_SR     sr           sr        utf_8
+28  Norwegian1  nb_NO     no        nb_NO   iso-8859-1
+29  Norwegian2  nn_NO     no        nn_NO   iso-8859-1
+30    Albanian  sq_AL  sq_AL        sq_AL        utf_8
+31     Bosnian  bs_BA  bs_BA        bs_BA  iso-8859-16
+32   Icelandic  is_IC     is           is   iso-8859-1
+33  Belarusian
