@@ -1,19 +1,10 @@
 library(vwr)
 library(markovchain)
-library(tidyverse)
-
-#Sys.setlocale(category = "LC_ALL", locale = "dutch")
-?Sys.setlocale
-#data <- data.frame(V1 = dutch.words)
-data <- read_csv("data_in/nl_NL.csv", col_names = F)
-names(data) <- "V1"
-#data <- read.csv("data_in/nl_NL.csv",
-#                 header = FALSE,
-#                 encoding = "ISO-8859-1", stringsAsFactors = F)
-#vec <- sapply(data$V1, function(x) nchar(x))
-
-#data <- data.frame(V1 = data[vec > 3,], stringsAsFactors = F)
-
+#library(tidyverse)
+library(readr)
+data <- read.csv("data_in/nl_NL.csv",
+                 header = FALSE,
+                 encoding = "ISO-8859-1", stringsAsFactors = F)
 # Functions for n - grams
 str_to_tokens = function(str_in, n){
   str_in_ls = unlist(strsplit(str_in, " "))
@@ -42,41 +33,18 @@ data$gram_1 <- sapply(data$V1, function(x) {paste(unlist(strsplit(x, "")), colla
 data$gram_2 <- sapply(data$gram_1, function(x) {str_to_tokens(str_in = x, n = 2)})
 data$gram_3 <- sapply(data$gram_1, function(x) {str_to_tokens(str_in = x, n = 3)})
 
-
-# prepare lists, ' - ' is start/ end of word
-list_1 <- unlist(strsplit(paste(data$gram_1, collapse = " \t "), " "))
-length(list_1)
-list_2 <- unlist(strsplit(paste(data$gram_2, collapse = " \t "), " "))
-length(list_2)
-list_3 <- unlist(strsplit(paste(data$gram_3, collapse = " \t "), " "))
-length(list_3)
-
-# train models
-mcFit_1 <- markovchainFit(data = list_1)
-mcFit_2 <- markovchainFit(data = list_2)
-mcFit_3 <- markovchainFit(data = list_3)
-
-# save models
-# 1 - gram
-states           <- mcFit_1$estimate@states
-states
-byRow            <- mcFit_1$estimate@byrow
-transitionMatrix <- mcFit_1$estimate@transitionMatrix
-write_lines(states, "./models/mcFit_1_states.txt")
-#write_lines(states, "./models/mcFit_1_states.zip")
-write_lines(transitionMatrix, "./models/mcFit_1_transitionMatrix.txt")
-# 2 - gram
-states           <- mcFit_2$estimate@states
-byRow            <- mcFit_2$estimate@byrow
-transitionMatrix <- mcFit_2$estimate@transitionMatrix
-write_lines(states, "./models/mcFit_2_states.txt")
-write_lines(transitionMatrix, "./models/mcFit_2_transitionMatrix.txt")
-# 3 - gram
-states           <- mcFit_3$estimate@states
-byRow            <- mcFit_3$estimate@byrow
-transitionMatrix <- mcFit_3$estimate@transitionMatrix
-write_lines(states, "./models/mcFit_3_states.txt")
-write_lines(transitionMatrix, "./models/mcFit_3_transitionMatrix.txt")
+# train and save models
+grams = c("gram_1", "gram_2", "gram_3")
+for (gram in grams) {
+  list<- unlist(strsplit(paste(data[,gram], collapse = " \t "), " "))
+  mcFit <- markovchainFit(data = list)
+  states           <- mcFit$estimate@states
+  transitionMatrix <- mcFit$estimate@transitionMatrix
+  write_lines(states, 
+              paste("./models/mcFit_", gram, "_states.txt", sep = ""))
+  write_lines(transitionMatrix, 
+              paste("./models/mcFit_", gram, "_transitionMatrix.txt", sep = ""))
+}
 
 # --------------------------------------------------------------------
 # construct models from files
