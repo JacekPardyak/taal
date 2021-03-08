@@ -1,11 +1,35 @@
 library(vwr)
 library(markovchain)
-#library(tidyverse)
-library(readr)
+library(tidyverse)
+library(zip)
 data <- read.csv("data_in/nl_NL.csv",
                  header = FALSE,
-                 encoding = "ISO-8859-1", stringsAsFactors = F)
-# Functions for n - grams
+                 encoding = "ISO-8859-1",
+                 stringsAsFactors = F)
+# change encoding
+Encoding(data$V1)  <- "UTF-8"
+
+# skip duplicates
+data <- data.frame(V1 = data[!duplicated(data$V1),], stringsAsFactors = F) # 135254 rows
+
+# skip too short and too long words
+vec <- sapply(data$V1, function(x) nchar(x))
+data <- data.frame(V1 = data[vec > 3 & vec < 15,], stringsAsFactors = F) # 123481 rows
+
+# skip words under different alphabet
+alphabet = c('a', 'b', 'c', 'd', 'e' , 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'ĳ', 'z',
+             'ä', 'ï', 'ü', 'ö' , 'ë', 'á', 'ó', 'é', 'è' )
+is_proper <- function(x){
+  tmp <- unlist(strsplit(x, ""))
+  sum(sapply(tmp, function(x) x %in% alphabet)) == length(tmp)
+}
+
+vec <- sapply(data$V1, function(x) is_proper(x))
+data <- data.frame(V1 = data[vec,], stringsAsFactors = F) # 94752 rows
+
+# coding check
+'crèche' %in% data$V1
+
 str_to_tokens = function(str_in, n){
   str_in_ls = unlist(strsplit(str_in, " "))
   str_out = str_in
@@ -27,6 +51,9 @@ tokens_to_str = function(str_in, n){
   str_out
 }
 
+# use dutch.words
+data <- data.frame(V1 = dutch.words, stringsAsFactors = F)
+
 
 # prepare n-grams
 data$gram_1 <- sapply(data$V1, function(x) {paste(unlist(strsplit(x, "")), collapse = " ")})
@@ -35,95 +62,78 @@ data$gram_3 <- sapply(data$gram_1, function(x) {str_to_tokens(str_in = x, n = 3)
 
 # train and save models
 grams = c("gram_1", "gram_2", "gram_3")
-for (gram in grams) {
+for (gram in grams[2:2]) {
   list<- unlist(strsplit(paste(data[,gram], collapse = " \t "), " "))
   mcFit <- markovchainFit(data = list)
   states           <- mcFit$estimate@states
   transitionMatrix <- mcFit$estimate@transitionMatrix
-  write_lines(states, 
-              paste("./models/mcFit_", gram, "_states.txt", sep = ""))
-  write_lines(transitionMatrix, 
-              paste("./models/mcFit_", gram, "_transitionMatrix.txt", sep = ""))
+  fileConn <- file(paste("./models/mcFit_", gram, "_states.txt", sep = ""))
+  writeLines(states, fileConn)
+  close(fileConn)
+  fileConn <- file(paste("./models/mcFit_", gram, "_transitionMatrix.txt", sep = ""))
+  writeLines(as.character(transitionMatrix), fileConn)
+  close(fileConn)
+  
 }
+
+zip_files = list.files(path = "./models/", pattern = ".txt$", full.names = T)
+zip(zipfile = "/models/models.zip", files = zip_files)
 
 # --------------------------------------------------------------------
 # construct models from files
-# 1 - gram
-states = read_lines("./models/mcFit_1_states.txt")
-states
-
-states = read_lines("https://jacekpardyak.github.io/Kaggle/models/mcFit_1_states.txt", 
-                    locale = locale(encoding = "UTF-8"))
-transitionMatrix = read_lines("./models/mcFit_1_transitionMatrix.txt")
-#transitionMatrix = read_lines("./models/mcFit_1_transitionMatrix.zip")
 temp <- tempfile()
-download.file("https://jacekpardyak.github.io/Kaggle/models/mcFit_1_transitionMatrix.zip",temp)
-transitionMatrix <- read_lines((unz(temp, "mcFit_1_transitionMatrix.txt")))
-unlink(temp)
-
+download.file("https://jacekpardyak.github.io/Kaggle/dutch_models.zip",temp)
+# 1 - gram
+states <- read_lines(unz(temp, "mcFit_gram_1_states.txt"))
+transitionMatrix = read_lines(unz(temp, "mcFit_gram_1_transitionMatrix.txt"))
 transitionMatrix <- matrix(data = as.numeric(transitionMatrix),
                            byrow = FALSE,
                            nrow = length(states),
-                         dimnames = list(states, states))
-
-mcFit_1_exp <- new("markovchain", 
+                           dimnames = list(states, states))
+mcFit_1 <- new("markovchain", 
                    states = states, 
                    byrow = TRUE,
                    transitionMatrix = transitionMatrix,
                    name = "dutch-1-gram")
+
 # 2 - gram
-#states = read_lines("./models/mcFit_2_states.txt")
-states = read_lines("https://jacekpardyak.github.io/Kaggle/models/mcFit_2_states.txt")
-#transitionMatrix = read_lines("./models/mcFit_2_transitionMatrix.txt")
-#transitionMatrix = read_lines("./models/mcFit_2_transitionMatrix.zip")
-temp <- tempfile()
-download.file("https://jacekpardyak.github.io/Kaggle/models/mcFit_2_transitionMatrix.zip",temp)
-transitionMatrix <- read_lines((unz(temp, "mcFit_2_transitionMatrix.txt")))
-unlink(temp)
-
+states <- read_lines(unz(temp, "mcFit_gram_2_states.txt"))
+transitionMatrix = read_lines(unz(temp, "mcFit_gram_2_transitionMatrix.txt"))
 transitionMatrix <- matrix(data = as.numeric(transitionMatrix),
                            byrow = FALSE,
                            nrow = length(states),
                            dimnames = list(states, states))
-
-mcFit_2_exp <- new("markovchain", 
-                   states = states, 
-                   byrow = TRUE,
-                   transitionMatrix = transitionMatrix,
-                   name = "dutch-2-gram")
-
+mcFit_2 <- new("markovchain", 
+               states = states, 
+               byrow = TRUE,
+               transitionMatrix = transitionMatrix,
+               name = "dutch-2-gram")
 # 3 - gram
-#states = read_lines("./models/mcFit_3_states.txt")
-states = read_lines("https://jacekpardyak.github.io/Kaggle/models/mcFit_3_states.txt")
-#transitionMatrix = read_lines("./models/mcFit_3_transitionMatrix.txt")
-#transitionMatrix = read_lines("./models/mcFit_3_transitionMatrix.zip")
-temp <- tempfile()
-download.file("https://jacekpardyak.github.io/Kaggle/models/mcFit_3_transitionMatrix.zip",temp)
-transitionMatrix <- read_lines((unz(temp, "mcFit_3_transitionMatrix.txt")))
-unlink(temp)
-
+states <- read_lines(unz(temp, "mcFit_gram_3_states.txt"))
+transitionMatrix = read_lines(unz(temp, "mcFit_gram_3_transitionMatrix.txt"))
 transitionMatrix <- matrix(data = as.numeric(transitionMatrix),
                            byrow = FALSE,
                            nrow = length(states),
                            dimnames = list(states, states))
+mcFit_3 <- new("markovchain", 
+               states = states, 
+               byrow = TRUE,
+               transitionMatrix = transitionMatrix,
+               name = "dutch-3-gram")
+unlink(temp)
 
-mcFit_3_exp <- new("markovchain", 
-                   states = states, 
-                   byrow = TRUE,
-                   transitionMatrix = transitionMatrix,
-                   name = "dutch-3-gram")
+# ------------------------------------------------------------------------------
+# Evaluate models
 
-
-
-predict(mcFit_1_exp, newdata = "\t", n.ahead = 5)
-predict(mcFit_2_exp, newdata = "\t", n.ahead = 5)
-predict(mcFit_3_exp, newdata = "\t", n.ahead = 5)
+predict(mcFit$estimate, newdata = "\t", n.ahead = 5)
+predict(mcFit_2, newdata = "\t", n.ahead = 5)
+predict(mcFit_3, newdata = "\t", n.ahead = 5)
 
 # pseudo words
 # 1 - gram
 df_out_1 <- 
   markovchainSequence(n=100,
-                      markovchain = mcFit_1_exp,
+                      markovchain = mcFit_1,
                       include=TRUE,
                       t0="\t") %>%
   paste(collapse = " ")  
@@ -135,7 +145,7 @@ df_out_1
 # 2 - gram
 df_out_2 <- 
   markovchainSequence(n=100,
-                      markovchain = mcFit_2_exp,
+                      markovchain = mcFit_2,
                       include=TRUE,
                       t0="\t") %>%
   paste(collapse = " ")  
@@ -148,7 +158,7 @@ df_out_2
 # 3 - gram
 df_out_3 <- 
   markovchainSequence(n=100,
-                      markovchain = mcFit_3_exp,
+                      markovchain = mcFit_3,
                       include=TRUE,
                       t0="\t") %>%
   paste(collapse = " ")  
@@ -161,9 +171,9 @@ df_out_3
 
 # -------------------------------------------
 # Evaluate the result
-pred_3 = df_out_3$V1[16]
+pred_3 = 'gesaus'
 pred_3 %in% dutch.words
-levenshtein.distance(pred_3, sample(dutch.words, 20))
+#levenshtein.distance(pred_3, sample(dutch.words, 20))
 levenshtein.neighbors(pred_3, dutch.words)[1:2]
 
 df_out_3 <- 
@@ -201,6 +211,7 @@ plot(results)
 
 # ----------
 
+?ldknn
 
 
 
