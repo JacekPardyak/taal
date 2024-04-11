@@ -6,23 +6,41 @@ format:
     embed-resources: true
 ---
 
+## Overzicht
+
+- definitie
+
+- twee onderzoeken
+
+1. Wereldgelukrapport, 2024
+
+2. Algemene levenstevredenheid in de EU, 2022
+
+
 ## Definitie
 
 **Geluk** is een complex en subjectief concept dat vaak wordt omschreven als een gevoel van tevredenheid, voldoening en welzijn. Het kan worden ervaren op verschillende niveaus, zoals op het gebied van individuele emoties, relaties, prestaties, en levensomstandigheden. Voor sommige mensen kan geluk worden geassocieerd met materiële rijkdom, terwijl anderen het vinden in relaties, persoonlijke groei, of het vervullen van doelen en dromen. Over het algemeen is geluk een toestand van welbevinden en tevredenheid met het leven zoals het is, maar de precieze definitie kan variëren van persoon tot persoon.
 
-## Bullets
-
-When you click the **Render** button a document will be generated that includes:
-
--   Content authored with markdown
--   Output from executable code
-
 ## Wereldgelukrapport 2024 [^bron1]
+
+Het Wereldgelukrapport is een jaarlijks rapport dat wordt uitgegeven door de Verenigde Naties en sinds 2012 is gepubliceerd. 
+
+Het rapport meet het geluk van mensen in verschillende landen over de hele wereld aan de hand van verschillende factoren, waaronder economische welvaart, sociale steun, levensverwachting, vrijheid om keuzes te maken, vrijgevigheid en afwezigheid van corruptie.
+
+
+[^bron1]: [worldhappiness.report](https://worldhappiness.report/)
+
+## Wereldgelukrapport 2024 - top 10
+
+Dit jaar de inwoners van Finland, Denemarken, IJsland, Zweden, Israël, Nederland, Noorwegen, Luxemburg, Zwitserland en Australië eindigden in de top 10
+
+## Wereldgelukrapport - resultaten
 
 ```{r}
 #| echo: false
 #| message: false
 library(tidyverse)
+library(sf)
 df <- readxl::read_excel("DataForFigure2.1+with+sub+bars+2024.xls")
 
 countries <- "geo, Country name, Land
@@ -37,29 +55,35 @@ AR, Argentina, Argentinië
 " %>% I() %>%
   read_csv()
 
-countries %>% left_join(df) %>% 
-  select(c(Land,  `Ladder score`)) %>% 
+countries %>% left_join(df %>% mutate(Rang = row_number())) %>% 
+  select(c(Rang, Land,  `Ladder score`)) %>% 
   rename(Resultaat = "Ladder score") %>%
   arrange(desc(Resultaat)) %>% 
-  mutate_if(is.numeric, round, 1) %>% 
+  mutate_if(is.numeric, round, 2) %>% 
   reactable::reactable()
 ```
 
-[^bron1]: [worldhappiness.report](https://worldhappiness.report/)
+## Wereldgelukrapport - factoren
 
-## Wereldgelukrapport 2024
+```{r}
+#| echo: false
+tt <- function(x, y) {
+    paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
+}
+```
+
 ```{r}
 countries %>% left_join(df) %>% 
   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) %>% 
   mutate_if(is.numeric, round, 1) %>%
-    rename(BBP = "Explained by: Log GDP per capita") %>%
+    rename(BPC = "Explained by: Log GDP per capita") %>%
     rename(SOS = "Explained by: Social support") %>%
     rename(GLV = "Explained by: Healthy life expectancy") %>%
     rename(VLM = "Explained by: Freedom to make life choices") %>%
     rename(VGH = "Explained by: Generosity") %>%
     rename(PVC = "Explained by: Perceptions of corruption") %>%
   column_to_rownames(var = "geo") %>%
-  t() %>% reactable::reactable()
+  t() %>% reactable::reactable( wrap = FALSE)
 
 # bruto binnenlands product per capita (bpc)
 # Sociale steun (sos)
@@ -69,16 +93,53 @@ countries %>% left_join(df) %>%
 # Percepties van corruptie (PVC)
 ```
 
+De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgende factoren: `r tt("BPC","Bruto binnenlands product per capita")`, `r tt("SOS","Sociale steun")`, `r tt("GLV","Gezonde levensverwachting")`, `r tt("VLM","Vrijheid om levenskeuzes te maken")`, `r tt("VGH","Vrijgevigheid")` en `r tt("PVC","Percepties van corruptie")`.
 
 
-
-## Algemene levenstevredenheid in de EU, 2022 [^bron2]
+## Algemene levenstevredenheid [^bron2]
 
 ```{r}
 #| echo: false
 #| message: false
+#| warning: false
 
-read_csv("ilc_pw01_page_linear.csv")
+
+"https://raw.githubusercontent.com/eurostat/Nuts2json/master/pub/v2/2016/3035/20M/0.json" %>%
+   st_read(layer = 'nutsrg', quiet = TRUE) -> borders
+
+"ilc_pw01_page_linear.csv" %>% read_csv() %>%
+  select('geo', 'OBS_VALUE') %>%
+  filter(! geo == "EU27_2020") %>% 
+  rename(id = geo) %>%
+  left_join(borders) -> borders
+
+ borders %>%
+   ggplot() +
+   geom_sf() +
+   aes(geometry = geometry, fill = OBS_VALUE) +
+   geom_sf_label(aes(label = OBS_VALUE)) +
+#   ggtitle("Algemene levenstevredenheid in de EU, 2022") +
+   theme(legend.position = "none",
+        axis.line = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank())
 ```
 
 [^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
+
+## bbbl
+
+```{r}
+#| echo: false
+tt <- function(x, y) {
+    paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
+}
+```
+
+This is some random text with a tooltip `r tt("here","This is great")` and a tooltip `r tt("there","Fantastic")`.
+
+```
+
