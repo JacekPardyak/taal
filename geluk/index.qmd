@@ -98,6 +98,12 @@ De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgend
 
 ## Algemene levenstevredenheid [^bron2]
 
+
+[^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
+
+
+## Algemene levenstevredenheid
+
 ```{r}
 #| echo: false
 #| message: false
@@ -128,7 +134,7 @@ De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgend
         panel.grid.minor = element_blank())
 ```
 
-[^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
+
 
 ## bbbl
 
