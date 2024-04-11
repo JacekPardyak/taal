@@ -1,0 +1,84 @@
+---
+title: "Voel je je gelukkig?"
+subtitle: "En waarom?"
+format: 
+  revealjs:
+    embed-resources: true
+---
+
+## Definitie
+
+**Geluk** is een complex en subjectief concept dat vaak wordt omschreven als een gevoel van tevredenheid, voldoening en welzijn. Het kan worden ervaren op verschillende niveaus, zoals op het gebied van individuele emoties, relaties, prestaties, en levensomstandigheden. Voor sommige mensen kan geluk worden geassocieerd met materiële rijkdom, terwijl anderen het vinden in relaties, persoonlijke groei, of het vervullen van doelen en dromen. Over het algemeen is geluk een toestand van welbevinden en tevredenheid met het leven zoals het is, maar de precieze definitie kan variëren van persoon tot persoon.
+
+## Bullets
+
+When you click the **Render** button a document will be generated that includes:
+
+-   Content authored with markdown
+-   Output from executable code
+
+## Wereldgelukrapport 2024 [^bron1]
+
+```{r}
+#| echo: false
+#| message: false
+library(tidyverse)
+df <- readxl::read_excel("DataForFigure2.1+with+sub+bars+2024.xls")
+
+countries <- "geo, Country name, Land
+NL, Netherlands, Nederland
+KG, Kyrgyzstan, Kirgizië
+BR, Brazil, Brazilië
+PL, Poland, Polen
+RO, Romania, Roemenië
+VN, Vietnam, Vietnam
+CN, China, China
+AR, Argentina, Argentinië
+" %>% I() %>%
+  read_csv()
+
+countries %>% left_join(df) %>% 
+  select(c(Land,  `Ladder score`)) %>% 
+  rename(Resultaat = "Ladder score") %>%
+  arrange(desc(Resultaat)) %>% 
+  mutate_if(is.numeric, round, 1) %>% 
+  reactable::reactable()
+```
+
+[^bron1]: [worldhappiness.report](https://worldhappiness.report/)
+
+## Wereldgelukrapport 2024
+```{r}
+countries %>% left_join(df) %>% 
+  select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) %>% 
+  mutate_if(is.numeric, round, 1) %>%
+    rename(BBP = "Explained by: Log GDP per capita") %>%
+    rename(SOS = "Explained by: Social support") %>%
+    rename(GLV = "Explained by: Healthy life expectancy") %>%
+    rename(VLM = "Explained by: Freedom to make life choices") %>%
+    rename(VGH = "Explained by: Generosity") %>%
+    rename(PVC = "Explained by: Perceptions of corruption") %>%
+  column_to_rownames(var = "geo") %>%
+  t() %>% reactable::reactable()
+
+# bruto binnenlands product per capita (bpc)
+# Sociale steun (sos)
+# Gezonde levensverwachting (GLV)
+# Vrijheid om levenskeuzes te maken (VLM)
+# Vrijgevigheid (VGH)
+# Percepties van corruptie (PVC)
+```
+
+
+
+
+## Algemene levenstevredenheid in de EU, 2022 [^bron2]
+
+```{r}
+#| echo: false
+#| message: false
+
+read_csv("ilc_pw01_page_linear.csv")
+```
+
+[^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
