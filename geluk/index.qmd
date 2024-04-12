@@ -12,14 +12,45 @@ format:
 
 - twee onderzoeken
 
+
+
+::: {.notes}
+Speaker notes go here.
+:::
+
+
+
+## Tegeltjeswijsheid over geluk
+
+"Geluk is niet iets kant-en-klaars. Het komt door je eigen acties." - Dalai Lama
+
+"Geluk hangt af van wat je kunt geven, niet van wat je kunt krijgen." - Mahatma Gandhi
+
+"Het geheim van geluk ligt niet in het bezitten van veel, maar in het waarderen van weinig." - Epicurus
+
+"Geluk is een richting, geen bestemming." - Unknown
+
+"Het geluk van je leven hangt af van de kwaliteit van je gedachten." - Marcus Aurelius
+
+"Geluk is niet iets wat je vindt, het is iets wat je creëert." - Unknown
+
+"Het geheim van geluk is vrijheid, het geheim van vrijheid is moed." - Carrie Jones
+
+"Geluk is geen doel op zich; het is een bijproduct van een zinvol leven." - Unknown
+
+## Wat is geluk?
+
+**Geluk** is een complex en subjectief concept dat vaak wordt omschreven als een gevoel van tevredenheid, voldoening en welzijn. 
+
+# Factoren die bijdragen aan geluk
+
+Voor sommige mensen kan geluk worden geassocieerd met materiële rijkdom, terwijl anderen het vinden in relaties, persoonlijke groei, of het vervullen van doelen en dromen. 
+
+## Hoe geluk te meten
+
 1. Wereldgelukrapport, 2024
 
 2. Algemene levenstevredenheid in de EU, 2022
-
-
-## Definitie
-
-**Geluk** is een complex en subjectief concept dat vaak wordt omschreven als een gevoel van tevredenheid, voldoening en welzijn. Het kan worden ervaren op verschillende niveaus, zoals op het gebied van individuele emoties, relaties, prestaties, en levensomstandigheden. Voor sommige mensen kan geluk worden geassocieerd met materiële rijkdom, terwijl anderen het vinden in relaties, persoonlijke groei, of het vervullen van doelen en dromen. Over het algemeen is geluk een toestand van welbevinden en tevredenheid met het leven zoals het is, maar de precieze definitie kan variëren van persoon tot persoon.
 
 ## Wereldgelukrapport 2024 [^bron1]
 
@@ -63,27 +94,25 @@ countries %>% left_join(df %>% mutate(Rang = row_number())) %>%
   reactable::reactable()
 ```
 
+
+
+```{r}
 ## Wereldgelukrapport - factoren
-
-```{r}
 #| echo: false
-tt <- function(x, y) {
-    paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
-}
-```
-
-```{r}
-countries %>% left_join(df) %>% 
-  select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) %>% 
-  mutate_if(is.numeric, round, 1) %>%
-    rename(BPC = "Explained by: Log GDP per capita") %>%
-    rename(SOS = "Explained by: Social support") %>%
-    rename(GLV = "Explained by: Healthy life expectancy") %>%
-    rename(VLM = "Explained by: Freedom to make life choices") %>%
-    rename(VGH = "Explained by: Generosity") %>%
-    rename(PVC = "Explained by: Perceptions of corruption") %>%
-  column_to_rownames(var = "geo") %>%
-  t() %>% reactable::reactable( wrap = FALSE)
+# tt <- function(x, y) {
+#     paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
+# }
+# countries %>% left_join(df) %>% 
+#   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) %>% 
+#   mutate_if(is.numeric, round, 1) %>%
+#     rename(BPC = "Explained by: Log GDP per capita") %>%
+#     rename(SOS = "Explained by: Social support") %>%
+#     rename(GLV = "Explained by: Healthy life expectancy") %>%
+#     rename(VLM = "Explained by: Freedom to make life choices") %>%
+#     rename(VGH = "Explained by: Generosity") %>%
+#     rename(PVC = "Explained by: Perceptions of corruption") %>%
+#   column_to_rownames(var = "geo") %>%
+#   t() %>% reactable::reactable( wrap = FALSE)
 
 # bruto binnenlands product per capita (bpc)
 # Sociale steun (sos)
@@ -91,9 +120,11 @@ countries %>% left_join(df) %>%
 # Vrijheid om levenskeuzes te maken (VLM)
 # Vrijgevigheid (VGH)
 # Percepties van corruptie (PVC)
+#De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgende factoren: `r #tt("BPC","Bruto binnenlands product per capita")`, `r tt("SOS","Sociale steun")`, `r tt("GLV","Gezonde levensverwachting")`, `r tt("VLM","Vrijheid om levenskeuzes te maken")`, `r tt("VGH","Vrijgevigheid")` en `r tt("PVC","Percepties van corruptie")`.
+
 ```
 
-De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgende factoren: `r tt("BPC","Bruto binnenlands product per capita")`, `r tt("SOS","Sociale steun")`, `r tt("GLV","Gezonde levensverwachting")`, `r tt("VLM","Vrijheid om levenskeuzes te maken")`, `r tt("VGH","Vrijgevigheid")` en `r tt("PVC","Percepties van corruptie")`.
+
 
 
 ## Algemene levenstevredenheid [^bron2]
@@ -134,18 +165,21 @@ De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgend
         panel.grid.minor = element_blank())
 ```
 
+## Mythen en misvattingen over geluk
+
+Ontkracht populaire mythen en misvattingen over geluk, zoals het idee dat geld gelukkig maakt of dat geluk constant moet zijn.
+
+## Culturele en maatschappelijke perspectieven op geluk
+
+- Een dwaas heeft altijd geluk🇵🇱
+
+## Geluk op de werkplek
 
 
-## bbbl
 
-```{r}
-#| echo: false
-tt <- function(x, y) {
-    paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
-}
-```
+## Geluk en gezondheid
 
-This is some random text with a tooltip `r tt("here","This is great")` and a tooltip `r tt("there","Fantastic")`.
 
-```
+## Strategieën voor het vergroten van geluk
+
 
