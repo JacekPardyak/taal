@@ -72,6 +72,8 @@ Dit jaar de inwoners van Finland, Denemarken, IJsland, Zweden, Israël, Nederlan
 #| message: false
 library(tidyverse)
 library(sf)
+library(gt)
+
 df <- readxl::read_excel("DataForFigure2.1+with+sub+bars+2024.xls")
 
 countries <- "geo, Country name, Land
@@ -83,15 +85,20 @@ RO, Romania, Roemenië
 VN, Vietnam, Vietnam
 CN, China, China
 AR, Argentina, Argentinië
-" %>% I() %>%
+" |> I() |>
   read_csv()
 
-countries %>% left_join(df %>% mutate(Rang = row_number())) %>% 
-  select(c(Rang, Land,  `Ladder score`)) %>% 
-  rename(Resultaat = "Ladder score") %>%
-  arrange(desc(Resultaat)) %>% 
-  mutate_if(is.numeric, round, 2) %>% 
-  reactable::reactable()
+
+countries |> left_join(df |> mutate(Rang = row_number())) |> 
+  select(c(geo, Rang, Land,  `Ladder score`)) |> 
+  rename(Resultaat = "Ladder score") |>
+  arrange(desc(Resultaat)) |> 
+  mutate_if(is.numeric, round, 2) |>
+  gt() |>
+  cols_move_to_start(columns = geo) |>
+  fmt_flag(columns = geo) |>
+  cols_label(geo = "")
+
 ```
 
 
@@ -102,17 +109,17 @@ countries %>% left_join(df %>% mutate(Rang = row_number())) %>%
 # tt <- function(x, y) {
 #     paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
 # }
-# countries %>% left_join(df) %>% 
-#   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) %>% 
-#   mutate_if(is.numeric, round, 1) %>%
-#     rename(BPC = "Explained by: Log GDP per capita") %>%
-#     rename(SOS = "Explained by: Social support") %>%
-#     rename(GLV = "Explained by: Healthy life expectancy") %>%
-#     rename(VLM = "Explained by: Freedom to make life choices") %>%
-#     rename(VGH = "Explained by: Generosity") %>%
-#     rename(PVC = "Explained by: Perceptions of corruption") %>%
-#   column_to_rownames(var = "geo") %>%
-#   t() %>% reactable::reactable( wrap = FALSE)
+# countries |> left_join(df) |> 
+#   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) |> 
+#   mutate_if(is.numeric, round, 1) |>
+#     rename(BPC = "Explained by: Log GDP per capita") |>
+#     rename(SOS = "Explained by: Social support") |>
+#     rename(GLV = "Explained by: Healthy life expectancy") |>
+#     rename(VLM = "Explained by: Freedom to make life choices") |>
+#     rename(VGH = "Explained by: Generosity") |>
+#     rename(PVC = "Explained by: Perceptions of corruption") |>
+#   column_to_rownames(var = "geo") |>
+#   t() |> reactable::reactable( wrap = FALSE)
 
 # bruto binnenlands product per capita (bpc)
 # Sociale steun (sos)
@@ -127,7 +134,7 @@ countries %>% left_join(df %>% mutate(Rang = row_number())) %>%
 
 
 
-## Algemene levenstevredenheid [^bron2]
+## Levenstevredenheid in de EU [^bron2]
 
 
 [^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
@@ -141,16 +148,16 @@ countries %>% left_join(df %>% mutate(Rang = row_number())) %>%
 #| warning: false
 
 
-"https://raw.githubusercontent.com/eurostat/Nuts2json/master/pub/v2/2016/3035/20M/0.json" %>%
+"https://raw.githubusercontent.com/eurostat/Nuts2json/master/pub/v2/2016/3035/20M/0.json" |>
    st_read(layer = 'nutsrg', quiet = TRUE) -> borders
 
-"ilc_pw01_page_linear.csv" %>% read_csv() %>%
-  select('geo', 'OBS_VALUE') %>%
-  filter(! geo == "EU27_2020") %>% 
-  rename(id = geo) %>%
+"ilc_pw01_page_linear.csv" |> read_csv() |>
+  select('geo', 'OBS_VALUE') |>
+  filter(! geo == "EU27_2020") |> 
+  rename(id = geo) |>
   left_join(borders) -> borders
 
- borders %>%
+ borders |>
    ggplot() +
    geom_sf() +
    aes(geometry = geometry, fill = OBS_VALUE) +
@@ -171,15 +178,21 @@ Ontkracht populaire mythen en misvattingen over geluk, zoals het idee dat geld g
 
 ## Culturele en maatschappelijke perspectieven op geluk
 
-- Een dwaas heeft altijd geluk🇵🇱
+- Een dwaas heeft altijd geluk
 
 ## Geluk op de werkplek
 
-
+-
 
 ## Geluk en gezondheid
 
+-
 
 ## Strategieën voor het vergroten van geluk
 
+-
+
+```{r}
+
+```
 
