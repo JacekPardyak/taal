@@ -8,39 +8,57 @@ format:
 
 ## Overzicht
 
-- definitie
+- Inleiding
 
-- twee onderzoeken
+- De aard van geluk
 
+- Factoren die geluk beïnvloeden
 
+- Hoe geluk te meten
+
+- Strategieën voor het bevorderen van geluk
+
+- Culturele perspectieven op geluk
+
+- Het belang van geluk
+
+- Conclusie
+
+- Vragen en Discussie
 
 ::: {.notes}
 Speaker notes go here.
 :::
 
-
-
-## Tegeltjeswijsheid over geluk
-
-"Geluk is niet iets kant-en-klaars. Het komt door je eigen acties." - Dalai Lama
-
-"Geluk hangt af van wat je kunt geven, niet van wat je kunt krijgen." - Mahatma Gandhi
-
-"Het geheim van geluk ligt niet in het bezitten van veel, maar in het waarderen van weinig." - Epicurus
-
-"Geluk is een richting, geen bestemming." - Unknown
-
-"Het geluk van je leven hangt af van de kwaliteit van je gedachten." - Marcus Aurelius
-
-"Geluk is niet iets wat je vindt, het is iets wat je creëert." - Unknown
-
-"Het geheim van geluk is vrijheid, het geheim van vrijheid is moed." - Carrie Jones
-
-"Geluk is geen doel op zich; het is een bijproduct van een zinvol leven." - Unknown
-
 ## Wat is geluk?
 
-**Geluk** is een complex en subjectief concept dat vaak wordt omschreven als een gevoel van tevredenheid, voldoening en welzijn. 
+- **geluk** is een mentale of emotionele toestand van welzijn die wordt gekenmerkt door aangename emoties
+
+- een **gelukkig** mens ervaart vreugde, vredigheid, ontspannenheid en vrolijkheid
+
+- **gelukkig** zijn is het tegengestelde van **ongelukkig** zijn
+
+::: {.callout-tip}
+## Tip
+
+*Geluk is niet iets kant-en-klaars. Het komt door je eigen acties* - Dalai Lama
+
+*Geen geluk zonder druk* - Nederlands spreekwoord
+
+:::
+
+## De aard van geluk
+
+- Geluk ervaren is een individuele zaak
+
+- De ervaring van geluk verandert in de loop van de tijd
+
+::: {.callout-warning}
+
+Een bepaald persoon is misschien gelukkig met een bepaald type auto, terwijl anderen nooit in die auto gezien zouden willen worden, en een gevoel van ongeluk zouden ervaren wanneer dit wél zou gebeuren.
+
+:::
+
 
 # Factoren die bijdragen aan geluk
 
@@ -48,22 +66,20 @@ Voor sommige mensen kan geluk worden geassocieerd met materiële rijkdom, terwij
 
 ## Hoe geluk te meten
 
-1. Wereldgelukrapport, 2024
+1. Wereldgelukrapport, 2024[^bron1]
 
 2. Algemene levenstevredenheid in de EU, 2022
 
-## Wereldgelukrapport 2024 [^bron1]
+[^bron1]: [worldhappiness.report](https://worldhappiness.report/)
+
+
+## Wereldgelukrapport 2024 
 
 Het Wereldgelukrapport is een jaarlijks rapport dat wordt uitgegeven door de Verenigde Naties en sinds 2012 is gepubliceerd. 
 
 Het rapport meet het geluk van mensen in verschillende landen over de hele wereld aan de hand van verschillende factoren, waaronder economische welvaart, sociale steun, levensverwachting, vrijheid om keuzes te maken, vrijgevigheid en afwezigheid van corruptie.
 
 
-[^bron1]: [worldhappiness.report](https://worldhappiness.report/)
-
-## Wereldgelukrapport 2024 - top 10
-
-Dit jaar de inwoners van Finland, Denemarken, IJsland, Zweden, Israël, Nederland, Noorwegen, Luxemburg, Zwitserland en Australië eindigden in de top 10
 
 ## Wereldgelukrapport - resultaten
 
@@ -101,26 +117,38 @@ countries |> left_join(df |> mutate(Rang = row_number())) |>
 
 ```
 
+::: {.notes}
+
+W rtym roku pierwsze mijsce zajmuje:
+
+Ostanie miejsce zajmuje:
+
+Dit jaar de inwoners van Finland, Denemarken, IJsland, Zweden, Israël, Nederland, Noorwegen, Luxemburg, Zwitserland en Australië eindigden in de top 10
+:::
+
+
+## Wereldgelukrapport - factoren
 
 
 ```{r}
-## Wereldgelukrapport - factoren
 #| echo: false
 # tt <- function(x, y) {
 #     paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
 # }
-# countries |> left_join(df) |> 
-#   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) |> 
-#   mutate_if(is.numeric, round, 1) |>
-#     rename(BPC = "Explained by: Log GDP per capita") |>
-#     rename(SOS = "Explained by: Social support") |>
-#     rename(GLV = "Explained by: Healthy life expectancy") |>
-#     rename(VLM = "Explained by: Freedom to make life choices") |>
-#     rename(VGH = "Explained by: Generosity") |>
-#     rename(PVC = "Explained by: Perceptions of corruption") |>
-#   column_to_rownames(var = "geo") |>
-#   t() |> reactable::reactable( wrap = FALSE)
-
+ countries |> left_join(df) |> 
+   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) |> 
+   mutate_if(is.numeric, round, 1) |>
+     rename("Economische welvaart" = "Explained by: Log GDP per capita") |>
+     rename("Sociale steun" = "Explained by: Social support") |>
+     rename("Levensverwachting" = "Explained by: Healthy life expectancy") |>
+     rename("Vrijheid" = "Explained by: Freedom to make life choices") |>
+     rename("Vrijgevigheid" = "Explained by: Generosity") |>
+     rename("Afwezigheid van corruptie" = "Explained by: Perceptions of corruption") |>
+  gt()  |>
+  cols_move_to_start(columns = geo) |>
+  fmt_flag(columns = geo) |>
+  cols_label(geo = "")
+ 
 # bruto binnenlands product per capita (bpc)
 # Sociale steun (sos)
 # Gezonde levensverwachting (GLV)
@@ -139,8 +167,10 @@ countries |> left_join(df |> mutate(Rang = row_number())) |>
 
 [^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
 
+## Algemene levenstevredenheid - factoren
 
-## Algemene levenstevredenheid
+
+## Algemene levenstevredenheid - resultaten 
 
 ```{r}
 #| echo: false
@@ -196,3 +226,9 @@ Ontkracht populaire mythen en misvattingen over geluk, zoals het idee dat geld g
 
 ```
 
+
+## Vragen en Discussie
+
+::: {.notes}
+Gelegenheid voor het publiek om vragen te stellen en ideeën uit te wisselen over geluk.
+:::
