@@ -8,23 +8,17 @@ format:
 
 ## Overzicht
 
-- Inleiding
+- "Geluk" in het Nederlands
+
+- Wat is geluk?
 
 - De aard van geluk
 
-- Factoren die geluk beïnvloeden
+- Waar komt geluk vandaan?
 
-- Hoe geluk te meten
+- Hoe geluk meten?
 
-- Strategieën voor het bevorderen van geluk
-
-- Culturele perspectieven op geluk
-
-- Het belang van geluk
-
-- Conclusie
-
-- Vragen en Discussie
+- Vragen en discussie
 
 ::: {.notes}
 Speaker notes go here.
@@ -32,15 +26,20 @@ Speaker notes go here.
 
 ## "Geluk" in het Nederlands
 
+*direct*
+
 - We zijn samen gelukkig.
 
 - Hij had geluk in de loterij.
 
-- Ik ga pinnen. Is het gelukt.
+- Vrouwen wagen hun geluk; mannen riskeren het hunne.
+
+*gerelateerd*
 
 - Het lukt me niet meer om op te staan.
 
-- Vrouwen wagen hun geluk; mannen riskeren het hunne.
+- Ik ga pinnen. Het is gelukt.
+
 
 ::: {.notes}
 Geluk is een abstract begrip. Hier zijn enkele voorbeelden. vandaag zullen we geluk als een emotie beschouwen.
@@ -209,13 +208,12 @@ Afghanistan neemt de laatste plaats (1.7)
 
 ::: {.callout-tip}
 ## Vraag
-
 Hebben jullie hier opmerkingen over?
 :::
 
 ::: {.notes}
 
-De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgende factoren.
+De tabel toont de meest en minst belangrijke variabele die bijdraagt aan de landenscore
 Op één uitzondering na is het bbp (Bruto binnenlands product) de belangrijkste factor.
 
 :::
@@ -277,37 +275,20 @@ De algehele levenstevredenheid index werd berekend op basis van beoordelingen va
         panel.grid.minor = element_blank())
 ```
 
-::: {.callout-tip}
-## Vraag
-
-Hebben jullie hier opmerkingen over?
-:::
-
 ::: {.notes}
 
 De beoordeling was het hoogst in Oostenrijk (7,9) en het laagst in Bulgarije (5,6).
 
 :::
 
-## Mythen en misvattingen over geluk
-
-Ontkracht populaire mythen en misvattingen over geluk, zoals het idee dat geld gelukkig maakt of dat geluk constant moet zijn.
-
-## Culturele en maatschappelijke perspectieven op geluk
-
-- Een dwaas heeft altijd geluk
-
-## Geluk op de werkplek
-
--
-
-
-## Conclusie
-
-VEEL GELUK!
 
 ## Vragen en Discussie
 
-::: {.notes}
-Gelegenheid voor het publiek om vragen te stellen en ideeën uit te wisselen over geluk.
-:::
+- Wat is geluk volgens jullie?
+
+- Zijn jullie gelukkig?
+
+
+**VEEL GELUK!**
+
+
