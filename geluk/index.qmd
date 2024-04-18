@@ -1,5 +1,5 @@
 ---
-title: "Voel je je gelukkig?"
+title: "Zijn jullie gelukkig?"
 subtitle: "En waarom?"
 format: 
   revealjs:
@@ -30,13 +30,73 @@ format:
 Speaker notes go here.
 :::
 
+## "Gelukkig zijn" in het Nederlands
+
+- We zijn samen gelukkig.
+
+- Hij had geluk in de loterij.
+
+- Ik ga pinnen. Is het gelukt.
+
+- Het lukt me niet meer om op te staan.
+
+- Vrouwen wagen hun geluk; mannen riskeren het hunne.
+
+::: {.notes}
+Geluk is een abstract begrip. Hier zijn enkele voorbeelden. vandaag zullen we geluk als een emotie beschouwen.
+:::
+
+
 ## Wat is geluk?
 
-- **geluk** is een mentale of emotionele toestand van welzijn die wordt gekenmerkt door aangename emoties
+Op het gebied van kunst, psychologie, filosofie, economie en religie worden verschillende definities van geluk gebruikt. 
 
-- een **gelukkig** mens ervaart vreugde, vredigheid, ontspannenheid en vrolijkheid
+Het wordt in verschillende tijdperken en verschillende culturen anders begrepen.
 
-- **gelukkig** zijn is het tegengestelde van **ongelukkig** zijn
+
+::: {.callout-note}
+
+Gelukkig zijn betekent voor mij ervaren wat ik verwacht en niet ervaren wat ik niet verwacht
+
+Zijn jullie het ermee eens?
+:::
+
+## De aard van geluk
+
+- Geluk ervaren is een individuele zaak
+
+::: {.callout-note}
+
+Een bepaald persoon is misschien gelukkig met een bepaald type auto, terwijl anderen nooit in die auto gezien zouden willen worden, en een gevoel van ongeluk zouden ervaren wanneer dit wél zou gebeuren.
+
+:::
+
+- De ervaring van geluk verandert in de loop van de tijd
+
+- Gelukkig zijn gaat gepaard met het ervaren van positieve emoties zoals vreugde, vredigheid, ontspannenheid en vrolijkheid
+
+## De aard van geluk
+
+- Gelukkig zijn is het tegengestelde van ongelukkig zijn (depressie, overspannenheid, woede of verdriet)
+
+- Onderzoek duidt er op dat geluk voor ongeveer de helft erfelijk bepaald is. De rest van de verschillen wordt veroorzaakt door invloeden uit de omgeving
+
+::: {.callout-note}
+
+Soms moet je geluk hebben om gelukkig te zijn.
+
+:::
+
+## Waar komt geluk vandaan?
+
+Voor sommige mensen kan geluk worden geassocieerd met 
+
+- materiële rijkdom, 
+
+terwijl anderen het vinden in 
+
+- relaties, persoonlijke groei, of het vervullen van doelen en dromen.
+
 
 ::: {.callout-tip}
 ## Tip
@@ -47,39 +107,22 @@ Speaker notes go here.
 
 :::
 
-## De aard van geluk
 
-- Geluk ervaren is een individuele zaak
-
-- De ervaring van geluk verandert in de loop van de tijd
-
-::: {.callout-warning}
-
-Een bepaald persoon is misschien gelukkig met een bepaald type auto, terwijl anderen nooit in die auto gezien zouden willen worden, en een gevoel van ongeluk zouden ervaren wanneer dit wél zou gebeuren.
-
-:::
-
-
-# Factoren die bijdragen aan geluk
-
-Voor sommige mensen kan geluk worden geassocieerd met materiële rijkdom, terwijl anderen het vinden in relaties, persoonlijke groei, of het vervullen van doelen en dromen. 
-
-## Hoe geluk te meten
+## Hoe geluk meten?
 
 1. Wereldgelukrapport, 2024[^bron1]
 
-2. Algemene levenstevredenheid in de EU, 2022
+2. Algemene levenstevredenheid in de EU, 2022[^bron2]
 
 [^bron1]: [worldhappiness.report](https://worldhappiness.report/)
 
+[^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
 
-## Wereldgelukrapport 2024 
+## Wereldgelukrapport
 
 Het Wereldgelukrapport is een jaarlijks rapport dat wordt uitgegeven door de Verenigde Naties en sinds 2012 is gepubliceerd. 
 
 Het rapport meet het geluk van mensen in verschillende landen over de hele wereld aan de hand van verschillende factoren, waaronder economische welvaart, sociale steun, levensverwachting, vrijheid om keuzes te maken, vrijgevigheid en afwezigheid van corruptie.
-
-
 
 ## Wereldgelukrapport - resultaten
 
@@ -117,60 +160,83 @@ countries |> left_join(df |> mutate(Rang = row_number())) |>
 
 ```
 
-::: {.notes}
+::: {.callout-tip}
+## Vraag
 
-W rtym roku pierwsze mijsce zajmuje:
-
-Ostanie miejsce zajmuje:
-
-Dit jaar de inwoners van Finland, Denemarken, IJsland, Zweden, Israël, Nederland, Noorwegen, Luxemburg, Zwitserland en Australië eindigden in de top 10
+Hebben jullie hier opmerkingen over?
 :::
 
 
-## Wereldgelukrapport - factoren
+::: {.notes}
+
+Dit jaar pakt Finland de eerste plaats (7.74)
+Afghanistan neemt de laatste plaats (1.7)
+
+
+:::
+
+
+## Wereldgelukrapport - indicatoren
 
 
 ```{r}
-#| echo: false
-# tt <- function(x, y) {
-#     paste0('<a href="#" data-toggle="tooltip" title="',y,'">',x,'</a>')
-# }
  countries |> left_join(df) |> 
-   select(! c(Land, `Ladder score`, `Country name`, upperwhisker, lowerwhisker, `Dystopia + residual`)) |> 
+   select(! c(Land, `Country name`, upperwhisker, lowerwhisker)) |> 
    mutate_if(is.numeric, round, 1) |>
+     rename("Resultaat" = "Ladder score") |>
      rename("Economische welvaart" = "Explained by: Log GDP per capita") |>
      rename("Sociale steun" = "Explained by: Social support") |>
      rename("Levensverwachting" = "Explained by: Healthy life expectancy") |>
      rename("Vrijheid" = "Explained by: Freedom to make life choices") |>
      rename("Vrijgevigheid" = "Explained by: Generosity") |>
      rename("Afwezigheid van corruptie" = "Explained by: Perceptions of corruption") |>
+  arrange(desc(Resultaat)) |>
   gt()  |>
   cols_move_to_start(columns = geo) |>
   fmt_flag(columns = geo) |>
   cols_label(geo = "")
  
-# bruto binnenlands product per capita (bpc)
-# Sociale steun (sos)
-# Gezonde levensverwachting (GLV)
-# Vrijheid om levenskeuzes te maken (VLM)
-# Vrijgevigheid (VGH)
-# Percepties van corruptie (PVC)
-#De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgende factoren: `r #tt("BPC","Bruto binnenlands product per capita")`, `r tt("SOS","Sociale steun")`, `r tt("GLV","Gezonde levensverwachting")`, `r tt("VLM","Vrijheid om levenskeuzes te maken")`, `r tt("VGH","Vrijgevigheid")` en `r tt("PVC","Percepties van corruptie")`.
-
 ```
 
+::: {.callout-tip}
+## Vraag
+
+Hebben jullie hier opmerkingen over?
+:::
+
+::: {.notes}
+
+De cijfers laten zien in hoeverre het resultaat wordt beïnvloed door de volgende factoren.
+Op één uitzondering na is het bbp (Bruto binnenlands product) de belangrijkste factor.
+
+:::
 
 
+## Levenstevredenheid in de EU
 
-## Levenstevredenheid in de EU [^bron2]
+Dit EUROSTAT-onderzoek richt zich op de algehele levenstevredenheid van personen (zelf beoordeeld op een schaal van 0-10), wat misschien de enige manier is om de diversiteit van de ervaringen, keuzes, prioriteiten en waarden van een individu te integreren.
 
+## Levenstevredenheid - indicatoren
 
-[^bron2]: [ec.europa.eu/eurostat/](https://ec.europa.eu/eurostat/)
+De algehele levenstevredenheid index werd berekend op basis van beoordelingen van 8 indicatoren:
 
-## Algemene levenstevredenheid - factoren
+- materiële levensomstandigheden
 
+- productiviteit of hoofdactiviteit
 
-## Algemene levenstevredenheid - resultaten 
+- onderwijs
+
+- gezondheid
+
+- vrijetijdsbesteding en sociale interacties
+
+- economische en fysieke veiligheid
+
+- bestuur en fundamentele rechten
+
+- natuurlijke en leefomgeving
+
+## Levenstevredenheid - resultaten 
 
 ```{r}
 #| echo: false
@@ -201,6 +267,18 @@ Dit jaar de inwoners van Finland, Denemarken, IJsland, Zweden, Israël, Nederlan
         panel.grid.major = element_blank(),
         panel.grid.minor = element_blank())
 ```
+
+::: {.callout-tip}
+## Vraag
+
+Hebben jullie hier opmerkingen over?
+:::
+
+::: {.notes}
+
+De beoordeling was het hoogst in Oostenrijk (7,9) en het laagst in Bulgarije (5,6).
+
+:::
 
 ## Mythen en misvattingen over geluk
 
