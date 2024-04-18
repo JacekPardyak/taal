@@ -30,7 +30,7 @@ format:
 Speaker notes go here.
 :::
 
-## "Gelukkig zijn" in het Nederlands
+## "Geluk" in het Nederlands
 
 - We zijn samen gelukkig.
 
@@ -60,6 +60,15 @@ Gelukkig zijn betekent voor mij ervaren wat ik verwacht en niet ervaren wat ik n
 
 Zijn jullie het ermee eens?
 :::
+
+## Hoe ziet geluk eruit?
+
+![Twee gelukkige personen, *Tacuinum Sanitatis*, 14e eeuw](55-aspetti_di_vita_quotidiana,_gioia,Taccuino_Sanitatis,_Cas.jpg){.lightbox}
+
+::: {.notes}
+Tacuinum Sanitatis – een middeleeuwse handleiding over een gezonde levensstijl.
+:::
+
 
 ## De aard van geluk
 
@@ -292,18 +301,10 @@ Ontkracht populaire mythen en misvattingen over geluk, zoals het idee dat geld g
 
 -
 
-## Geluk en gezondheid
 
--
+## Conclusie
 
-## Strategieën voor het vergroten van geluk
-
--
-
-```{r}
-
-```
-
+VEEL GELUK!
 
 ## Vragen en Discussie
 
