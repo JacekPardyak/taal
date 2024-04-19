@@ -24,17 +24,21 @@ format:
 Speaker notes go here.
 :::
 
-## "Geluk" in het Nederlands
+## "Geluk" in het Nederlands {.smaller}
 
-*direct*
-
-- We zijn samen gelukkig.
+*"Geluk" als zelfstandig naamwoord:*
 
 - Hij had geluk in de loterij.
 
 - Vrouwen wagen hun geluk; mannen riskeren het hunne.
 
-*gerelateerd*
+*als bijvoeglijk naamwoord:*
+
+- We zijn samen gelukkig.
+
+- Veel mensen vergissen zich in wat ze gelukkig maakt.
+
+*als werkwoord (lukken of gelukken):*
 
 - Het lukt me niet meer om op te staan.
 
@@ -42,6 +46,10 @@ Speaker notes go here.
 
 
 ::: {.notes}
+- het lukt niet - ik viel van mijn fiets ... 
+
+- geluk niet op kunnen = Maximaal blij zijn
+
 Geluk is een abstract begrip. Hier zijn enkele voorbeelden. vandaag zullen we geluk als een emotie beschouwen.
 :::
 
@@ -182,6 +190,7 @@ Hebben jullie hier opmerkingen over?
 Dit jaar pakt Finland de eerste plaats (7.74)
 Afghanistan neemt de laatste plaats (1.7)
 
+Sisu is een Fins begrip dat zoiets betekent als 'doorzettingsvermogen, volharding, een ijzeren wil om een bepaalde, vaak langdurige taak te voltooien.
 
 :::
 
@@ -225,7 +234,7 @@ Op één uitzondering na is het bbp (Bruto binnenlands product) de belangrijkste
 
 Dit EUROSTAT-onderzoek richt zich op de algehele levenstevredenheid van personen (zelf beoordeeld op een schaal van 0-10), wat misschien de enige manier is om de diversiteit van de ervaringen, keuzes, prioriteiten en waarden van een individu te integreren.
 
-## Levenstevredenheid - indicatoren
+## Levenstevredenheid - indicatoren {.smaller}
 
 De algehele levenstevredenheid index werd berekend op basis van beoordelingen van 8 indicatoren:
 
@@ -291,6 +300,11 @@ De beoordeling was het hoogst in Oostenrijk (7,9) en het laagst in Bulgarije (5,
 - Zijn jullie gelukkig?
 
 
-**VEEL GELUK!**
+::: {.callout-tip}
 
+- Veel geluk!
 
+- Gelukkig Koningsdag!
+
+- Mijn geluk kan niet op!
+:::
